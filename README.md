@@ -150,9 +150,10 @@ We consider an episodic finite horizon Decision Process that consists of $\{\mat
 
 We assume the cost function $c:\mathcal{X}_ H\to\mathbb{R}$ is only defined at the last time step $H$, and $\rho \in\Delta(\mathcal{X}_ {h+1})$ for $h\in[H-1]$.
 
-We assume that the cost function only depends on observations.
 
-We assume that $\mathcal{X}_h$ is discrete. Also $|\mathcal{X}_ h|$ could be easily extremely large and the algorithm that has a polynomial dependency on $|\mathcal{X}_ h|$ should be considered as sample inefficient.
+the cost function only depends on observations.
+
+We assume that $\mathcal{X}_ h$ is discrete. Also $|\mathcal{X}_ h|$ could be easily extremely large and the algorithm that has a polynomial dependency on $|\mathcal{X}_ h|$ should be considered as sample inefficient.
 
 We assume that the cost is bounded for any sequence of observation, $c_H\leq 1$.
 
