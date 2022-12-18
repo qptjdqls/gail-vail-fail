@@ -143,9 +143,9 @@ In the next paragraph, we will learn more about the terms.
 
 #### Preliminaries
 
-We consider an episodic finite horizon Decision Process that consists of $\{\mathcal{X}_ h\}_{h=1}^H,\ \mathcal{A},\ c$, $\ H,\ \rho,\ P$ where $\mathcal{X}_ h$ for $h\in[H]$ is a time-dependent $\mathcal{A}$ is a discrete action such space such that $|\mathcal{A}|=K$, $H$ is the horizon.
+We consider an episodic finite horizon Decision Process that consists of $\{\mathcal{X}_ h\}_ {h=1}^H,\mathcal{A},c$, $H,\rho,P$ where $\mathcal{X}_ h$ for $h\in[H]$ is a time-dependent $\mathcal{A}$ is a discrete action such space such that $|\mathcal{A}|=K$, $H$ is the horizon.
 
-We assume the cost function $c:\mathcal{X}_H\to\mathbb{R}$ is only defined at the last time step $H$, and $\rho \in\Delta(\mathcal{X}_{h+1})$ for $h\in[H-1]$.
+We assume the cost function $c:\mathcal{X}_ H\to\mathbb{R}$ is only defined at the last time step $H$, and $\rho \in\Delta(\mathcal{X}_ {h+1})$ for $h\in[H-1]$.
 
 We assume that the cost function only depends on observations.
 
@@ -159,7 +159,7 @@ $$
 V_h^\pi(x_h)=\mathbb{E}[c(x_H)|a_i\sim\pi_i(\cdot|x_i),x_{i+1}\sim P_{x_i,a_i}],
 $$
 
-and state-action function $Q_h^\pi(x_h,a_h)$ is defined as $Q_h^\pi(x_h,a_h)=\mathbb{E}_{x_{h+1}\sim P_{x_h,a_h}}[V_{h+1}^\pi (x_{h+1})]$ with $V_H^\pi(x)=c(x)$.
+and state-action function $Q_ h^\pi(x_ h,a_ h)$ is defined as $Q_ h^\pi(x_ h,a_ h)=\mathbb{E}_ {x_ {h+1}\sim P_{x_ h,a_ h}}[V_ {h+1}^\pi (x_ {h+1})]$ with $V_ H^\pi(x)=c(x)$.
 
 We denote $\mu_h^\pi$ as the distribution over $\mathcal{X}_h$ at time step $h$ following $\pi$.
 
@@ -171,7 +171,7 @@ $$
 
 Denote $\mathcal{F}_h\subset \{f:\mathcal{X}_h\to\mathbb{R}\}$ for $h\in[H]$.
 
-We define a Bellman Operator $\Gamma_h$ associated with the expert $\pi_h^*$ at time step $h$ as $\Gamma_h:\mathcal{F}_{h+1}\to \{ f: \mathcal{X}_h\to\mathbb{R}\}$ where for any $x_h\in\mathcal{X}_h$, $f\in\mathcal{F}_{h+1}$,
+We define a Bellman Operator $\Gamma_ h$ associated with the expert $\pi_ h^{\*}$ at time step $h$ as $\Gamma_ h:\mathcal{F}_ {h+1}\to \{ f: \mathcal{X}_ h\to\mathbb{R}\}$ where for any $x_ h\in\mathcal{X}_ h$, $f\in\mathcal{F}_ {h+1}$,
 
 $$
 (\Gamma_h f)(x_h) \triangleq \mathbb{E}_{a_h\sim\pi_h^* (\cdot|x_h),x_{h+1}\sim P_{x_h,a_h}}[f(x_{h+1})].
@@ -187,6 +187,45 @@ $$
 
 We could obtain various popular distances by choosing the different classes of functions $\mathcal{F}$.
 
-For instance IPM with $\mathcal{F}=\{f:||f||_\infty \leq 1\}$ recovers Total Variation distance, IPM with $\mathcal{F}=\{f:||f||_L \leq 1\}$ recovers Wasserstein distance, and IPM with $\mathcal{F}=\{f:||X||_{\mathcal{H}} \leq 1\}$ with RKHS $\mathcal{H}$ reveals maximum mean discrepancy (MMD), which is the implemented method for the paper.
+For instance IPM with $\mathcal{F}=\{f:||f||_ \infty \leq 1\}$ recovers Total Variation distance, IPM with $\mathcal{F}=\{f:||f||_ L \leq 1\}$ recovers Wasserstein distance, and IPM with $\mathcal{F}=\{f:||X||_ {\mathcal{H}} \leq 1\}$ with RKHS $\mathcal{H}$ reveals maximum mean discrepancy (MMD), which is the implemented method for the paper.
 
+### Algorithm
+
+FAIL tries to learn a sequence of policies (time-depend) $\pi=\{\pi_1, \dots, \pi_H\}$ such that its value $J(\pi)$ is close to $J(\pi^{\*})$.
+
+Note that $J(\pi)\approx J(\pi^{\*})$ doesn't necessarily mean that the state distribution of $\pi$ is close to $\pi^{\*}$.
+
+When learning $\pi_i$, the algorithm fixes $\{\pi_1,\dots, \pi_{i-1}\}$, and solves a min-max game to compute $\pi_i$.
+
+Therefore,  Fail can decompose a sequential learning problem into $H$-many independent two-player min-max games, where each game can be solved efficiently via no-regret online learning. 
+
+### Learning One Step Policy via a Min-Max Game 
+
+Minimizing distance between two distributions can be viewed as the following IPM minimization problem.
+
+Then the IPM with $\mathcal{F}_ {h+1}$ between $\nu_{h+1}$ and $\mu_{h+1}^{\*}$ is defined as:
+
+$$
+d_{\mathcal{F}_ {h+1}}(\pi|\nu_h, \mu_{h+1}^{\*}) = \underset{f\in\mathcal{F}_ {h+1}}{\max} \big(\mathbb{E}_ {x\sim\nu_{h+1}}[f(x)] - \mathbb{E}_ {x\sim\mu_{h+1}^{\*}} [f(x)]\big).
+$$
+
+we can approximately minimize the distance between two distributions $\hat{d}_ {\mathcal{F}_ {h+1}}$ with respect to $\pi$: $\min_{\pi\in\Pi} \hat{d}_ {\mathcal{F}_ {h+1}}(\pi|\nu_h,\mu_{h+1}^{\*})$, resulting in a two-player min-max game. 
+
+We can think of $\pi$ as a generator, which generates next-step samples $x_{h+1}$ conditioned on $\nu_h$ that are similar to the expert samples from $\mu_{h+1}^{\*}$, and $\mathcal{F_{h+1}}$ as a discriminators tries to guess which samples came from whom. 
+
+The above formulation is a two-player game, with the utility function for $\pi$ and $f$ defined as :
+
+$$
+u(\pi, f)\triangleq \sum_{i=1}^N K\pi(a_h^i|x_h^i)f(x_{h+1}^i)/N - \sum_{i=1}^{N'} f(\tilde{x}_ {h+1}^i) / N'.
+$$
+
+![fail1](./fail1.png) 
+
+### Forward Adversarial Imitation Learning
+
+We showed that conditioned on $\{\pi_1,\dots,\pi_{h-1}$ being fixed, Algorithm 1 finds a policy $\pi\in\Pi_h$ such that it approximately minimizes the divergence measured under IPM with $\mathcal{F}_ {h+1}$, between the observation distribution $\nu_{h+1}$ resulting from $\{\pi_1,\dots,\pi_{h-1}, \pi$, and the corresponding distribution $\mu_{h+1}^{\*}$ from an expert.
+
+With Algorithm 1 as the building block, we can now finish the model-free algorithm - Forward Adversarial Imitation Learning (FAIL) in Algorithm 2.
+
+![fail2](./fail2.png) 
 
